@@ -15,6 +15,7 @@ app = FastAPI()
 async def login(user_id: str, password: str):
     try:
         # Authenticate with Firebase
+        user_id=user_id+'@mail.com'
         user = auth.get_user_by_email(user_id)
 
         print(user)
