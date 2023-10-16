@@ -13,6 +13,8 @@ firebase_admin.initialize_app(cred, {
     'storageBucket': 'pbldashboard.appspot.com'  # Replace with your actual bucket name
 })
 
+db = firestore.client()
+
 # ==================================================================================
 
 
@@ -35,7 +37,6 @@ firebase_admin.initialize_app(cred, {
 @app.post("/login")
 async def login(user_id: str, password: str):
     try:
-        # Authenticate with Firebase
         user_id = user_id + '@mail.com'
         user = auth.get_user_by_email(user_id)
 

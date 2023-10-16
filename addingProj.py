@@ -44,31 +44,63 @@ def create_project(project_id, title, description, resources_link, repo_link, fa
 
 
 # create_project(
-#     project_id="Car",
-#     title="Car Automation Project",
-#     description="A test project",
+#     project_id="PBL Dashboard",
+#     title="Pble Automation Project",
+#     description="A test PBL  project",
 #     resources_link="https://example.com/resources",
 #     repo_link="https://github.com/sample/repo",
-#     faculty_users=["Sanskar","Sanskar1"],
-#     student_users=["yash",]
+#     faculty_users=["CP"],
+#     student_users=["Mohit",]
 # )
 
 
 def get_user_projects(user_id: str):
     projects_ref = db.collection("Projects")
     query = projects_ref.where("faculty_users", "array_contains", user_id).stream()
-    print(query)
+    # print(query)
     
     faculty_projects = [project.to_dict() for project in query]
 
     query = projects_ref.where("student_users", "array_contains", user_id).stream()
-    print(query)
+    # print(query)
     student_projects = [project.to_dict() for project in query]
-    print(student_projects)
+    # print(student_projects)
     # Combine faculty and student projects into a single list
     all_projects = faculty_projects + student_projects
 
     return {"user_projects": all_projects}
 
-print(get_user_projects("Yash")
-)
+# print(get_user_projects("CP"))
+
+
+def update_project_user(  project_id: str,
+    user_id: str,
+    add_user: bool = Query(False, description="Set to true to add the user, false to remove")):
+    try:
+        # Reference to the specific project document
+        project_ref = db.collection("Projects").document(project_id)
+
+        # Get the current project data
+        project_data = project_ref.get().to_dict()
+        print(project_data)
+
+        # Update faculty or student users based on the add_user flag
+        if add_user:
+            if user_id not in project_data["faculty_users"]:
+                project_data["faculty_users"].append(user_id)
+        else:
+            if user_id in project_data["faculty_users"]:
+                project_data["faculty_users"].remove(user_id)
+
+        # Update the project document in Firestore
+        project_ref.set(project_data)
+
+        return {"message": "User added to project" if add_user else "User removed from project"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+
+# print(update_project_user(project_id="Car",user_id="yash1",add_user=True))
+
+
