@@ -3,6 +3,8 @@ import firebase_admin
 from firebase_admin import auth, credentials, storage,firestore,initialize_app
 import os
 from typing import List
+from mailjet_rest import Client
+
 
 
 app = FastAPI()
@@ -34,6 +36,8 @@ db = firestore.client()
 
 #     print(f"File {os.path.basename(file_path)} uploaded to Firebase Storage")
 
+
+###########CHECKED##########################
 @app.post("/login")
 async def login(user_id: str, password: str):
     try:
@@ -68,6 +72,7 @@ async def add_project(
 # ======================================================================
 
 # Endpoint to retrieve all projects
+#################CHECKED#################################
 @app.get("/projects/")
 async def get_all_projects():
     projects_ref = db.collection("Projects")
@@ -78,6 +83,8 @@ async def get_all_projects():
 # ===============================================================================
 
 # Endpoint to retrieve projects associated with a user
+
+##################CHECKED###############################
 @app.get("/user-projects/")
 async def get_user_projects(user_id: str):
     projects_ref = db.collection("Projects")
@@ -94,6 +101,7 @@ async def get_user_projects(user_id: str):
 
 # ================================================================================
 # Endpoint to add or remove a user from a project
+
 @app.put("/update-project-users/")
 async def update_project_users(
     project_id: str,
@@ -124,27 +132,32 @@ async def update_project_users(
 
 # ======================================================================================
 
-def create_project(project_id, title, description, resources_link, repo_link, faculty_users, student_users):
-    try:
-        # Reference to the "Projects" collection
-        projects_ref = db.collection("Projects")
 
-        # Create a new project document with the specified project ID
-        project_data = {
-            "project_id": project_id,
-            "title": title,
-            "description": description,
-            "resources_link": resources_link,
-            "repo_link": repo_link,
-            "faculty_users": faculty_users,
-            "student_users": student_users
-        }
+@app.post("/send-email/")
+def send_email(sender:str,reciver:str,project_id:str):
+        
+    api_key = "8d668ef429f0c394d4a2fab1f5e91f60"
+    api_secret = "d4e83a1fc798f66b654adc51421823eb"
 
-        # Add the project document to Firestore
-        projects_ref.add(project_data)
-
-        return f"Project created with ID: {project_id}"
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
+    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+    data = {
+    'Messages': [
+                    {
+                            "From": {
+                                    "Email": sender,
+                                    "Name": sender
+                            },
+                            "To": [
+                                    {
+                                            "Email": reciver,
+                                            "Name": "aashu"
+                                    }
+                            ],
+                            "Subject": "Request for opting your project",
+                            "TextPart": "hey , i want to opt into your project named "+project_id,
+                    }
+            ]
+    }
+    result = mailjet.send.create(data=data)
+    print (result.status_code)
+    print (result.json())

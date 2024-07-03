@@ -70,7 +70,7 @@ def get_user_projects(user_id: str):
 
     return {"user_projects": all_projects}
 
-# print(get_user_projects("CP"))
+print(get_user_projects("CP"))
 
 
 def update_project_user(  project_id: str,
@@ -103,4 +103,42 @@ def update_project_user(  project_id: str,
 
 # print(update_project_user(project_id="Car",user_id="yash1",add_user=True))
 
+def get_all_projects():
+    projects_ref = db.collection("Projects")
+    projects = projects_ref.stream()
+    project_list = [project.to_dict() for project in projects]
+    return {"projects": project_list}
+
+# print(get_all_projects())
+
+
+
+
+
+
+
+
+
+# def create_project(project_id, title, description, resources_link, repo_link, faculty_users, student_users):
+#     try:
+#         # Reference to the "Projects" collection
+#         projects_ref = db.collection("Projects")
+
+#         # Create a new project document with the specified project ID
+#         project_data = {
+#             "project_id": project_id,
+#             "title": title,
+#             "description": description,
+#             "resources_link": resources_link,
+#             "repo_link": repo_link,
+#             "faculty_users": faculty_users,
+#             "student_users": student_users
+#         }
+
+#         # Add the project document to Firestore
+#         projects_ref.add(project_data)
+
+#         return f"Project created with ID: {project_id}"
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
